@@ -1,0 +1,45 @@
+input#ghtoken {
+  padding: 0.3em;
+  width: 300px;
+}
+
+#total {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.issues {
+  padding-left: 0;
+}
+
+.issue {
+  list-style: none;
+  padding-left: 1em;
+  line-height: 1.5;
+}
+
+.link {
+  color: black;
+  text-decoration: none;
+}
+
+.number {
+  color: gray;
+  margin-right: 0.5em;
+}
+
+.title {
+  font-weight: bold;
+}
+
+.labels {
+}
+
+.label {
+  font-weight: bold;
+  padding: 2px 3px;
+  margin-left: 0.5em;
+  font-size: 0.8em;
+  border-radius: 2px;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+}

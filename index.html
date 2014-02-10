@@ -1,0 +1,148 @@
+<html>
+<head>
+  <link href="main.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<h1>GitHub Issues</h1>
+
+<p>
+Enter your GitHub Personal Access Token:
+<input id="ghtoken" type="password"></input>
+</p>
+
+<p>
+Total
+<span id="total">0</span>
+issue(s) found
+</p>
+
+<script type="text/javascript">
+
+var repos = [
+'strongloop/loopback',
+'strongloop/strong-remoting',
+
+/* connectors */
+'strongloop/loopback-connector-jsonrpc',
+'strongloop/loopback-connector-mongodb',
+'strongloop/loopback-connector-mysql',
+'strongloop/loopback-connector-oracle',
+'strongloop/loopback-connector-rest',
+'strongloop/loopback-oracle-installer',
+'strongloop/loopback-datasource-juggler',
+
+/* loopback extensions */
+'strongloop/loopback-workspace',
+'strongloop/loopback-explorer',
+'strongloop/loopback-push-notification',
+
+/* loopback clients */
+'strongloop/loopback-ios',
+'strongloop/loopback-clients',
+'strongloop/strong-remoting-clients',
+
+'strongloop/loopback-android',
+'strongloop/strong-remoting-android',
+
+'strongloop/loopback-angular',
+'strongloop/loopback-angular-cli',
+'strongloop/grunt-loopback-angular',
+
+/* loopback samples */
+'strongloop/loopback-sample-recipes',
+'strongloop/loopback-ios-getting-started',
+'strongloop/loopback-android-getting-started',
+'strongloop/loopback-testing',
+'strongloop/loopback-examples',
+'strongloop/loopback-example-access-control',
+'strongloop/loopback-example-remote-methods',
+'strongloop/loopback-example-proxy',
+'strongloop/sls-sample-app',
+];
+
+var ghtokenInput = document.getElementById('ghtoken');
+if (localStorage.ghtoken) {
+  ghtokenInput.value = localStorage.ghtoken;
+}
+ghtokenInput.addEventListener('input', function() {
+  localStorage.ghtoken = this.value;
+});
+
+var total = document.getElementById('total');
+
+repos.forEach(function(fullName) {
+  console.log('fetching repo', fullName);
+  var caption = document.createElement('h3');
+  caption.appendChild(document.createTextNode(fullName));
+  document.body.appendChild(caption);
+
+  var list = document.createElement('ul');
+  list.setAttribute('class', 'issues');
+  document.body.appendChild(list);
+
+  fetchBugs('https://api.github.com/repos/' + fullName + '/issues?per_page=100', list);
+});
+
+function fetchBugs(url, listElement) {
+  get(url, function(err, data) {
+    if (err) return console.error(err);
+
+    console.log('got data for', url);
+    total.innerText = +total.innerText + data.length;
+
+    data.forEach(function(issue) {
+      var item = document.createElement('li');
+      item.setAttribute('class', 'issue');
+
+      var link = document.createElement('a');
+      link.setAttribute('href', issue.html_url);
+      link.setAttribute('class', 'link');
+      item.appendChild(link);
+
+      var num = document.createElement('span');
+      num.setAttribute('class', 'number');
+      num.innerText = '#' + issue.number;
+      link.appendChild(num);
+
+      var title = document.createElement('span');
+      title.setAttribute('class', 'title');
+      title.innerText = issue.title;
+      link.appendChild(title);
+
+      var labels = document.createElement('span');
+      labels.setAttribute('class', 'labels');
+      item.appendChild(labels);
+
+      issue.labels.forEach(function(l) {
+        var le = document.createElement('span');
+        le.setAttribute('class', 'label');
+        le.setAttribute('style', 'background-color: #' + l.color);
+        le.innerText = l.name;
+        labels.appendChild(le);
+      });
+
+      listElement.appendChild(item);
+    });
+  });
+}
+
+function get(url, cb) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('get', url);
+  var auth = 'Basic ' + btoa(localStorage.ghtoken + ':x-oauth-basic');
+  xhr.setRequestHeader('Authorization', auth);
+  xhr.send();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState != 4) return;
+    if (xhr.status != 200) {
+      if (cb) cb(new Error('XHR failed: ' + xhr.status));
+      cb = null;
+    }
+    if (cb) cb(null, JSON.parse(xhr.responseText));
+    // TODO - handle paging via next link in HTTP headers
+    cb = null;
+  };
+}
+</script>
+</body>
